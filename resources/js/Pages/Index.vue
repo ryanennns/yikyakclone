@@ -1,9 +1,11 @@
 <script setup>
-import {onMounted} from "vue";
 import PostCard from "@/Pages/PostCard.vue";
+import CreatePostModal from "@/Pages/CreatePostModal.vue";
+import {reactive, ref} from "vue";
 
-const createPost = () => {
-    console.log('create post');
+const showModal = ref(false);
+const toggleModalVisibility = () => {
+    showModal.value = !showModal.value;
 };
 
 const props = defineProps({
@@ -13,48 +15,69 @@ const props = defineProps({
     },
 });
 
-onMounted(() => {
-    console.log(props.posts);
-});
+const posts = ref(props.posts.data);
 
 const versionsOfNothing = [
     "nothing",
     "nada",
-    "rien",
     "nichts",
     "niente",
-    "ничего",
-    "niets",
-    "ingenting",
     "nada",
-    "아무것도",
 ]
-const noPosts = versionsOfNothing[Math.floor(Math.random()*versionsOfNothing.length)]
+const noPosts = versionsOfNothing[Math.floor(Math.random() * versionsOfNothing.length)]
 
+const createPost = (event) => {
+    toggleModalVisibility();
+    console.log('createPost');
+    console.log(event);
+
+    fetch('/api/posts', {
+        // TODO handle CSRF
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            content: event.value,
+        }),
+    });
+
+    posts.value.unshift({
+        content: event.value,
+        comments: [],
+        created_at: new Date().toISOString(),
+    });
+}
 </script>
 
 <template>
     <div id="wrapper">
         <div class="header">
             <h1 id="header">yakClone.</h1>
-            <button id="createPost" @click=createPost><i class="fa-solid fa-pen"></i></button>
+            <button id="createPost" @click=toggleModalVisibility><i class="fa-solid fa-pen"></i></button>
         </div>
-        <div class="noPosts" v-if="props.posts.data.length === 0">
-            <p>{{noPosts}}.</p>
-            <p>Be the first one to make a post.</p>
+        <div class="noPosts" v-if="posts.length === 0">
+            <p id="nothing">{{ noPosts }}.</p>
+            <p>be the first one to make a post.</p>
         </div>
         <ul>
-            <li v-for="post in props.posts.data">
+            <li v-for="post in posts">
                 <PostCard :post="post"></PostCard>
             </li>
         </ul>
+
+        <CreatePostModal
+            :visible="showModal"
+            @close="toggleModalVisibility"
+            @submit="createPost"
+        />
     </div>
 </template>
 
 <style scoped>
 
 #wrapper {
-    height: 100vh;
     color: #4a4242;
     background-color: #FFFFF0;
     padding: 1rem 2rem;
@@ -92,5 +115,9 @@ const noPosts = versionsOfNothing[Math.floor(Math.random()*versionsOfNothing.len
     font-style: italic;
     text-align: center;
     margin-top: 2rem;
+}
+
+#nothing {
+    font-size: 2rem;
 }
 </style>
