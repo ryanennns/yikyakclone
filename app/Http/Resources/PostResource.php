@@ -13,7 +13,7 @@ class PostResource extends JsonResource
             'id'          => $this->id,
             'content'     => $this->content,
             'coordinates' => $this->coordinates,
-            'comments'    => $this->comments->count(),
+            'comments'    => $this->comments->toArray(),
             'created_at'  => $this->created_at,
         ];
     }
