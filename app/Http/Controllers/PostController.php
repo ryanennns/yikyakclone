@@ -13,7 +13,10 @@ class PostController extends Controller
     {
         // TODO custom validator
 
-        $posts = Post::query()->orderByDesc('created_at')->paginate(10);
+        $latitude = $request->input('latitude');
+        $longitude = $request->input('longitude');
+
+        $posts = Post::query()->withinRadius($latitude, $longitude, 5)->orderByDesc('created_at')->paginate(10);
 
         return PostResource::collection($posts)->response();
     }

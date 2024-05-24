@@ -19,11 +19,17 @@ class Post extends Model
 
     public function scopeWithinRadius($query, $latitude, $longitude, $radius = 5)
     {
-        // todo what is this LOL
-        $haversine = "(6371 * acos(cos(radians($latitude)) * cos(radians(latitude)) * cos(radians(longitude) - radians($longitude)) + sin(radians($latitude)) * sin(radians(latitude))))";
+        $haversine = "(6371 * acos(cos(radians(?))
+                        * cos(radians(latitude))
+                        * cos(radians(longitude)
+                        - radians(?))
+                        + sin(radians(?))
+                        * sin(radians(latitude))))";
 
-        return $query->selectRaw("{$haversine} AS distance")
-            ->having('distance', '<=', $radius)
+        $query->selectRaw("*, {$haversine} AS distance", [$latitude, $longitude, $latitude])
+            ->whereRaw("({$haversine}) <= ?", [$latitude, $longitude, $latitude, $radius])
             ->orderBy('distance');
+
+        return $query;
     }
 }

@@ -1,14 +1,12 @@
 <script setup>
 import PostCard from "@/Pages/PostCard.vue";
 import CreatePostModal from "@/Pages/CreatePostModal.vue";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, ref} from "vue";
 
 const showModal = ref(false);
 const toggleModalVisibility = () => {
     showModal.value = !showModal.value;
 };
-
-const posts = ref([]);
 
 const versionsOfNothing = [
     "nothing",
@@ -20,12 +18,6 @@ const versionsOfNothing = [
 const noPosts = versionsOfNothing[Math.floor(Math.random() * versionsOfNothing.length)]
 
 const createPost = (event) => {
-    toggleModalVisibility();
-
-    // debug logs
-    console.debug('createPost');
-    console.debug(event);
-
     fetch('/api/posts', {
         // TODO handle CSRF
         method: 'POST',
@@ -38,6 +30,12 @@ const createPost = (event) => {
             location: location.value,
         }),
     });
+}
+
+const posts = ref([]);
+const createPostModalSubmitted = (event) => {
+    toggleModalVisibility();
+    createPost(event);
 
     posts.value.unshift({
         content: event.value,
@@ -50,25 +48,34 @@ const cannotGetLocation = (error = {}) => {
     console.log('cannot get location');
 }
 const location = ref({})
+const setCurrentPosition = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+        location.value = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+        };
+    }, (error) => {
+        cannotGetLocation(error)
+    });
+}
+
+const fetchAndSetPosts = async () => {
+    await fetch('/api/posts', {
+        method: 'GET',
+    }).then(response => response.json()).then(data => {
+        posts.value = data.data;
+    }).catch(error => {
+        console.error(error);
+    });
+}
+
+const hasRetrievedInitialLocation = ref(false);
 onMounted(async () => {
     if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            location.value = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-            };
-        }, (error) => {
-            cannotGetLocation(error)
-        });
+        setCurrentPosition();
+        await fetchAndSetPosts();
 
-        await fetch('/api/posts', {
-            method: 'GET',
-        }).then(response => response.json()).then(data => {
-            console.log(data)
-            posts.value = data.data;
-        }).catch(error => {
-            console.error(error);
-        });
+        hasRetrievedInitialLocation.value = true;
     } else {
         cannotGetLocation();
     }
@@ -81,7 +88,9 @@ onMounted(async () => {
             <h1 id="header">yakClone.</h1>
             <button id="createPost" @click=toggleModalVisibility><i class="fa-solid fa-pen"></i></button>
         </div>
-        <div class="noPosts" v-if="posts.length === 0">
+        <div class="loading" v-if="!hasRetrievedInitialLocation">
+        </div>
+        <div class="noPosts" v-if="posts.length === 0 && hasRetrievedInitialLocation">
             <p id="nothing">{{ noPosts }}.</p>
             <p>be the first one to make a post.</p>
         </div>
@@ -94,7 +103,7 @@ onMounted(async () => {
         <CreatePostModal
             :visible="showModal"
             @close="toggleModalVisibility"
-            @submit="createPost"
+            @submit="createPostModalSubmitted"
         />
     </div>
 </template>
