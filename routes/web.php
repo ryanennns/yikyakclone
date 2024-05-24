@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\PostController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,8 +13,8 @@ Route::get('/posts', function () {
 })->name('posts.index');
 
 Route::prefix('api')->group(function () {
-    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+    Route::post('/posts', [PostController::class, 'store'])->name('api.posts.store');
+    Route::get('/posts', [PostController::class, 'index'])->name('api.posts.index');
 });
 
 require __DIR__ . '/auth.php';

@@ -50,8 +50,8 @@ const cannotGetLocation = (error = {}) => {
     console.log('cannot get location');
 }
 const location = ref({})
-onMounted(() => {
-    if('geolocation' in navigator) {
+onMounted(async () => {
+    if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition((position) => {
             location.value = {
                 latitude: position.coords.latitude,
@@ -59,6 +59,15 @@ onMounted(() => {
             };
         }, (error) => {
             cannotGetLocation(error)
+        });
+
+        await fetch('/api/posts', {
+            method: 'GET',
+        }).then(response => response.json()).then(data => {
+            console.log(data)
+            posts.value = data.data;
+        }).catch(error => {
+            console.error(error);
         });
     } else {
         cannotGetLocation();

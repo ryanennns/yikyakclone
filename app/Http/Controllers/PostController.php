@@ -9,18 +9,13 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function index(Request $request): void
+    public function index(Request $request): JsonResponse
     {
         // TODO custom validator
-        $request->validate([
-            'location' => ['array', 'required', function ($argument) {
-                return isset($argument['latitude']) && isset($argument['longitude']);
-            }]
-        ]);
 
         $posts = Post::query()->orderByDesc('created_at')->paginate(10);
 
-        $posts = PostResource::collection($posts);
+        return PostResource::collection($posts)->response();
     }
 
     public function store(Request $request): JsonResponse

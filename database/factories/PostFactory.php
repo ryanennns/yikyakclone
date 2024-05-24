@@ -10,7 +10,8 @@ class PostFactory extends Factory
     {
         return [
             'content' => $this->faker->paragraph,
-            'coordinates' => $this->faker->latitude . ',' . $this->faker->longitude,
+            'latitude' => $this->faker->latitude,
+            'longitude' => $this->faker->longitude,
         ];
     }
 }
