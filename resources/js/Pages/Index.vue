@@ -92,7 +92,7 @@ onMounted(async () => {
         </div>
         <div class="noPosts" v-if="posts.length === 0 && hasRetrievedInitialLocation">
             <p id="nothing">{{ noPosts }}.</p>
-            <p>be the first one to make a post.</p>
+            <p>be the first one to make a post!</p>
         </div>
         <ul>
             <li v-for="post in posts">
