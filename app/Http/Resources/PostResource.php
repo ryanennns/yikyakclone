@@ -12,7 +12,6 @@ class PostResource extends JsonResource
         return [
             'id'          => $this->id,
             'content'     => $this->content,
-            'coordinates' => $this->coordinates,
             'comments'    => $this->comments->toArray(),
             'created_at'  => $this->created_at,
         ];

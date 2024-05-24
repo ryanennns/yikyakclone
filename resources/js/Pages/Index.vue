@@ -1,21 +1,14 @@
 <script setup>
 import PostCard from "@/Pages/PostCard.vue";
 import CreatePostModal from "@/Pages/CreatePostModal.vue";
-import {reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
 const showModal = ref(false);
 const toggleModalVisibility = () => {
     showModal.value = !showModal.value;
 };
 
-const props = defineProps({
-    posts: {
-        type: Object,
-        required: true,
-    },
-});
-
-const posts = ref(props.posts.data);
+const posts = ref([]);
 
 const versionsOfNothing = [
     "nothing",
@@ -28,8 +21,10 @@ const noPosts = versionsOfNothing[Math.floor(Math.random() * versionsOfNothing.l
 
 const createPost = (event) => {
     toggleModalVisibility();
-    console.log('createPost');
-    console.log(event);
+
+    // debug logs
+    console.debug('createPost');
+    console.debug(event);
 
     fetch('/api/posts', {
         // TODO handle CSRF
@@ -40,6 +35,7 @@ const createPost = (event) => {
         },
         body: JSON.stringify({
             content: event.value,
+            location: location.value,
         }),
     });
 
@@ -49,6 +45,25 @@ const createPost = (event) => {
         created_at: new Date().toISOString(),
     });
 }
+
+const cannotGetLocation = (error = {}) => {
+    console.log('cannot get location');
+}
+const location = ref({})
+onMounted(() => {
+    if('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            location.value = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            };
+        }, (error) => {
+            cannotGetLocation(error)
+        });
+    } else {
+        cannotGetLocation();
+    }
+});
 </script>
 
 <template>
@@ -76,6 +91,16 @@ const createPost = (event) => {
 </template>
 
 <style scoped>
+body {
+    background-color: #FFFFF0;
+}
+
+@media (min-width: 768px) {
+    #wrapper {
+        width: 60%;
+        margin: 0 auto;
+    }
+}
 
 #wrapper {
     color: #4a4242;

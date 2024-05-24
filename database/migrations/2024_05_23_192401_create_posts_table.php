@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->longText('content');
-            $table->string('coordinates')->nullable();
+            $table->float('latitude');
+            $table->float('longitude');
             $table->timestamps();
         });
     }

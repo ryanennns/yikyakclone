@@ -16,4 +16,14 @@ class Post extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function scopeWithinRadius($query, $latitude, $longitude, $radius = 5)
+    {
+        // todo what is this LOL
+        $haversine = "(6371 * acos(cos(radians($latitude)) * cos(radians(latitude)) * cos(radians(longitude) - radians($longitude)) + sin(radians($latitude)) * sin(radians(latitude))))";
+
+        return $query->selectRaw("{$haversine} AS distance")
+            ->having('distance', '<=', $radius)
+            ->orderBy('distance');
+    }
 }
