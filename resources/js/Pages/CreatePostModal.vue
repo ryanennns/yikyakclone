@@ -13,6 +13,7 @@ const emit = defineEmits(['close', 'submit']);
 const content = ref('');
 const submit = () => {
     emit('submit', {'value': content.value});
+    content.value = '';
 }
 </script>
 

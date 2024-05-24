@@ -11,7 +11,10 @@ class PostController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        // TODO custom validator
+        $request->validate([
+            'latitude'  => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
+        ]);
 
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
